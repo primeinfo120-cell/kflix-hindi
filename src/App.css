@@ -1975,3 +1975,114 @@ input:focus-visible {
     width: 100%;
   }
 }
+/* ===== KFLIX HINDI — AUTH NAVBAR DESIGN ===== */
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nav-user-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #191919, #090909);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.nav-user::before {
+  content: "●";
+  color: #ff4444;
+  font-size: 10px;
+}
+
+.nav-logout,
+.nav-login,
+.nav-signup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.nav-logout {
+  border: 1px solid #950101;
+  background: #170707;
+  color: #ff7777;
+}
+
+.nav-logout:hover {
+  background: #950101;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.nav-login {
+  border: 1px solid #ffffff35;
+  background: #111;
+  color: #fff;
+}
+
+.nav-login:hover {
+  border-color: #ff3333;
+  color: #ff6666;
+}
+
+.nav-signup {
+  border: 1px solid #e50914;
+  background: linear-gradient(135deg, #f01818, #950101);
+  color: #fff;
+  box-shadow: 0 4px 15px #e5091425;
+}
+
+.nav-signup:hover {
+  background: linear-gradient(135deg, #ff3333, #c00000);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px #e5091445;
+}
+
+@media (max-width: 700px) {
+  .navbar {
+    gap: 10px;
+  }
+
+  .nav-tag {
+    display: none;
+  }
+
+  .nav-user-group {
+    gap: 6px;
+  }
+
+  .nav-user {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .nav-logout,
+  .nav-login,
+  .nav-signup {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+}

@@ -164,3 +164,191 @@
   .episode-admin-row .managed-actions { grid-column: 2 / -1; }
   .login-card { padding: 25px 20px; }
 }
+
+/* ===== KFLIX AUTH PAGE REDESIGN ===== */
+
+.login-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100vh;
+  padding: 35px 20px;
+  background:
+    radial-gradient(ellipse at 50% 45%, #260000 0%, #100000 32%, #050505 72%, #000 100%);
+}
+
+.login-page::before,
+.login-page::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.login-page::before {
+  top: 5%;
+  left: -150px;
+  background: #ff0000;
+}
+
+.login-page::after {
+  right: -150px;
+  bottom: 5%;
+  background: #950101;
+}
+
+.login-card {
+  position: relative;
+  width: min(440px, 100%);
+  gap: 19px;
+  padding: 42px 36px;
+  background: linear-gradient(145deg, #151515, #090909 75%);
+  border: 1px solid #ffffff18;
+  border-radius: 16px;
+  box-shadow:
+    0 25px 80px #000000b3,
+    0 0 45px #95010120;
+  animation: auth-card-appear 0.5s ease both;
+}
+
+.login-card .admin-brand {
+  margin-bottom: 5px;
+  font-size: 25px;
+  letter-spacing: -1.2px;
+}
+
+.login-card .eyebrow {
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid #ff252540;
+  border-radius: 30px;
+  background: #95010120;
+  color: #ff5a5a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.login-card h1 {
+  margin: -5px 0 0;
+  font-family: Outfit, sans-serif;
+  font-size: clamp(28px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.login-card p {
+  margin: -7px 0 3px;
+  color: #999;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.login-card label {
+  gap: 9px;
+  color: #ddd;
+  font-size: 12px;
+}
+
+.login-card input {
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 8px;
+  background: #050505;
+  color: #fff;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.login-card input:hover {
+  border-color: #ffffff45;
+}
+
+.login-card input:focus {
+  border-color: #ed1717;
+  background: #100606;
+  box-shadow: 0 0 0 3px #ff17171c;
+}
+
+.login-card input::placeholder {
+  color: #666;
+}
+
+.login-submit {
+  min-height: 49px;
+  margin-top: 3px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(110deg, #b80000, #f20b0b);
+  box-shadow: 0 7px 22px #e9000030;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+
+.login-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 10px 28px #e9000050;
+}
+
+.login-card > p a {
+  color: #ff5555;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-card > p a:hover {
+  color: #ff8888;
+  text-decoration: underline;
+}
+
+.login-card .back-public {
+  padding-top: 14px;
+  border-top: 1px solid #ffffff12;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.form-error {
+  padding: 11px 13px;
+  border: 1px solid #ff454540;
+  border-radius: 7px;
+  background: #ff000012;
+  color: #ff9999;
+  font-size: 12px;
+}
+
+@keyframes auth-card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 22px 15px;
+  }
+
+  .login-card {
+    padding: 32px 23px;
+    border-radius: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card {
+    animation: none;
+  }
+}

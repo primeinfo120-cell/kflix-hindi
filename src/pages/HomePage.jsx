@@ -1,7 +1,8 @@
 import { useAuth } from "../auth/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { firebaseReady } from "../firebase";
+import { auth, firebaseReady } from "../firebase";
+import { signOut } from "firebase/auth";
 import { watchPublishedDramas, watchPublishedEpisodes } from "../services/content";
 
 const fallbackImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%233D0000'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-family='Arial' font-size='24' text-anchor='middle'%3EKFLIX HINDI%3C/text%3E%3C/svg%3E";
@@ -54,6 +55,13 @@ function DramaCards({ dramas, episodeCounts }) {
 export default function HomePage() {
   const [search, setSearch] = useState("");
   const { user } = useAuth();
+  const handleLogout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
   const [navSearch, setNavSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [dramas, setDramas] = useState([]);
@@ -273,9 +281,19 @@ const navSearchResults = useMemo(() => {
   <div className="nav-tag">HINDI DUBBED</div>
   <div className="nav-auth">
   {user ? (
-    <span className="nav-user">
-      {user.displayName || "User"}
-    </span>
+    <div className="nav-user-group">
+  <span className="nav-user">
+    {user.displayName || user.email?.split("@")[0] || "User"}
+  </span>
+
+  <button
+    type="button"
+    className="nav-logout"
+    onClick={handleLogout}
+  >
+    Logout
+  </button>
+</div>
   ) : (
     <>
       <Link to="/login" className="nav-login">
