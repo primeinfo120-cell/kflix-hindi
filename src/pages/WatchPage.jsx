@@ -246,13 +246,16 @@ const nextEpisode =
 
             <div className="video-frame watch-frame">
               {embedUrl ? (
-                <iframe
-                  src={embedUrl}
-                  title={`${drama.title} episode ${episode.episodeNumber}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
+                
+<iframe
+  src={embedUrl}
+  title={`${drama.title} episode ${episode.episodeNumber}`}
+  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  referrerPolicy="strict-origin-when-cross-origin"
+  sandbox="allow-scripts allow-same-origin allow-presentation"
+ />
+
               ) : (
                 <div className="video-placeholder">
                   <span aria-hidden="true">▶</span>
