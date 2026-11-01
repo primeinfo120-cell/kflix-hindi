@@ -430,7 +430,14 @@ id="home"
         <section className="catalog" id="latest-dramas">
           <div className="section-heading"><div><span className="eyebrow">JUST ADDED</span><h2>Latest <span>Dramas</span></h2></div></div>
           {!loading && !error && latestDramas.length === 0 ? <p className="content-state">Published dramas will appear here.</p> : null}
-          <DramaCards dramas={latestDramas.slice(0, 6)} episodeCounts={episodeCounts} />
+          {loading ? (
+  <DramaSkeletons />
+) : (
+  <DramaCards
+    dramas={latestDramas.slice(0, 6)}
+    episodeCounts={episodeCounts}
+  />
+)}
         </section>
 
         <section className="catalog popular-section" id="popular">

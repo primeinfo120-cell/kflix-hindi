@@ -751,8 +751,10 @@ input:focus-visible {
 }
 
 .skeleton-poster {
-  min-height: 260px;
-  border-radius: 10px;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  min-height: 0;
+  border-radius: 8px;
 }
 
 .skeleton-line {
