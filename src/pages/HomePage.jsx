@@ -318,19 +318,45 @@ const navSearchResults = useMemo(() => {
 </header>
       <main>
         
-        <section
-className="hero hero-featured"          
-id="home"
-          style={
-            slideDrama
-              ? {
-                  backgroundImage: `linear-gradient(90deg, #000 8%, #000e 48%, #0005 100%), linear-gradient(0deg, #000 0%, transparent 55%), url("${slideDrama.backdropUrl || slideDrama.posterUrl || fallbackImage}")`,
-                }
-              : undefined
-          }
-        >
-          <div className="hero-content">
-            <span className="eyebrow">
+<section
+  className="hero hero-featured"
+  id="home"
+  style={{ position: "relative", overflow: "hidden" }}
+>
+  {slideDrama && (
+    <>
+      <img
+        className="hero-background"
+        src={slideDrama.backdropUrl || slideDrama.posterUrl || fallbackImage}
+        alt=""
+        fetchPriority="high"
+        loading="eager"
+        decoding="async"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center 30%",
+          zIndex: 0,
+        }}
+      />
+
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(90deg, #000 8%, #000e 48%, #0005 100%), linear-gradient(0deg, #000 0%, transparent 55%)",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
+    </>
+  )}
+<div className="hero-content" style={{ position: "relative", zIndex: 2 }}>            <span className="eyebrow">
               {slideDrama ? "FEATURED K-DRAMA" : "YOUR K-DRAMA DESTINATION"}
             </span>
 
@@ -374,8 +400,11 @@ id="home"
           </div>
 
           {slideDrama && latestDramas.length > 1 ? (
-            <div className="hero-controls" aria-label="Drama slideshow controls">
-              <button
+<div
+  className="hero-controls"
+  aria-label="Drama slideshow controls"
+  style={{ zIndex: 2 }}
+>              <button
                 type="button"
                 className="hero-arrow"
                 onClick={showPreviousSlide}
