@@ -319,8 +319,8 @@ const navSearchResults = useMemo(() => {
       <main>
         
         <section
-          className={`hero${slideDrama ? " hero-featured" : ""}`}
-          id="home"
+className="hero hero-featured"          
+id="home"
           style={
             slideDrama
               ? {
