@@ -1,5 +1,11 @@
 # React + Vite
 
+## Sitemap on Cloudflare Pages
+
+Cloudflare Pages should build with `npm run build` and publish the `dist` directory. The build's `postbuild` step creates `dist/sitemap.xml` from publicly published Firestore dramas and episodes, including video metadata for supported embeds. Set `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, and `VITE_FIREBASE_APP_ID` in the Cloudflare Pages build environment to include those URLs. If Firebase configuration is unavailable, the build still publishes a valid homepage-only sitemap.
+
+The static sitemap, Cloudflare content-type header, and sitemap reference in `robots.txt` are in `public/`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
