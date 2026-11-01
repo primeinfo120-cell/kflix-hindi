@@ -32,7 +32,18 @@ function DramaCards({ dramas, episodeCounts }) {
       {dramas.map((drama) => (
         <Link className="drama-card" key={drama.id} to={`/drama/${encodeURIComponent(drama.slug)}`}>
           <div className="poster">
-            <img src={drama.posterUrl || fallbackImage} alt={drama.title} loading="lazy" onError={(event) => { event.currentTarget.src = fallbackImage; }} />
+           <img
+  src={drama.posterUrl || fallbackImage}
+  alt={drama.title}
+  width="400"
+  height="600"
+  loading="lazy"
+  decoding="async"
+  onError={(event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = fallbackImage;
+  }}
+/>
             <span className="poster-label">K-DRAMA</span>
             <div className="poster-overlay"><span className="play-icon">▶</span><span>View Drama</span></div>
           </div>
@@ -127,19 +138,22 @@ export default function HomePage() {
     return counts;
   }, [episodes, dramaMap]);
   const categories = useMemo(() => ["All", ...new Set(dramas.flatMap((drama) => (drama.genre || "").split(",").map((item) => item.trim()).filter(Boolean)))], [dramas]);
-  const filtered = dramas.filter((drama) => {
-  const queryText = search.trim().toLowerCase();
-  const categoryText = (drama.genre || "").toLowerCase();
+  const filtered = useMemo(() => {
+  return dramas.filter((drama) => {
+    const queryText = search.trim().toLowerCase();
+    const categoryText = (drama.genre || "").toLowerCase();
 
-  const matchesSearch = !queryText ||
-    [drama.title, drama.description, drama.genre, drama.language]
-      .some((value) => value?.toLowerCase().includes(queryText));
+    const matchesSearch = !queryText ||
+      [drama.title, drama.description, drama.genre, drama.language]
+        .some((value) => value?.toLowerCase().includes(queryText));
 
-  const matchesCategory =
-    category === "All" || categoryText.includes(category.toLowerCase());
+    const matchesCategory =
+      category === "All" ||
+      categoryText.includes(category.toLowerCase());
 
-  return matchesSearch && matchesCategory;
-});
+    return matchesSearch && matchesCategory;
+  });
+}, [dramas, search, category]);
 
 const navSearchResults = useMemo(() => {
   const query = navSearch.trim().toLowerCase();
@@ -171,19 +185,22 @@ const navSearchResults = useMemo(() => {
     })
     .slice(0, 5);
 }, [dramas, navSearch]);
-  const popularDramas = [...dramas].sort((left, right) =>
-    (episodeCounts.get(right.id) || 0) - (episodeCounts.get(left.id) || 0) || sortNewest(left, right),
-  ).slice(0, 6);
-  const latestEpisodes = episodes
+  const popularDramas = useMemo(() => {
+  return [...dramas]
+    .sort((left, right) =>
+      (episodeCounts.get(right.id) || 0) -
+      (episodeCounts.get(left.id) || 0) ||
+      sortNewest(left, right)
+    )
+    .slice(0, 6);
+}, [dramas, episodeCounts]);
+  const latestEpisodes = useMemo(() => {
+  return episodes
     .filter((episode) => dramaMap.has(episode.dramaId))
     .sort(sortNewest)
     .slice(0, 8);
-  const featuredDrama = latestDramas[0];
-  const featuredEpisode = featuredDrama && episodes
-    .filter((episode) => episode.dramaId === featuredDrama.id)
-    .sort((left, right) => Number(left.episodeNumber) - Number(right.episodeNumber))[0];
-
-    
+}, [episodes, dramaMap]);
+ 
   useEffect(() => {
     if (latestDramas.length <= 1) {
       setActiveSlide(0);
@@ -198,14 +215,6 @@ const navSearchResults = useMemo(() => {
   }, [latestDramas.length]);
 
   const slideDrama = latestDramas[activeSlide] || latestDramas[0];
-
-  const slideEpisode = slideDrama
-    ? episodes
-        .filter((episode) => episode.dramaId === slideDrama.id)
-        .sort(
-          (a, b) => Number(a.episodeNumber) - Number(b.episodeNumber)
-        )[0]
-    : null;
 
   const showPreviousSlide = () => {
     setActiveSlide((current) =>
@@ -447,7 +456,18 @@ const navSearchResults = useMemo(() => {
   to={`/drama/${encodeURIComponent(drama.slug)}`}
   key={episode.id}
 >
-                    <img src={episode.thumbnailUrl || drama.posterUrl || fallbackImage} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = fallbackImage; }} />
+                    <img
+  src={episode.thumbnailUrl || drama.posterUrl || fallbackImage}
+  alt=""
+  width="640"
+  height="360"
+  loading="lazy"
+  decoding="async"
+  onError={(event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = fallbackImage;
+  }}
+/>
                     <span className="latest-play">▶</span>
                     <div><small>{drama.title}</small><h3>Episode {episode.episodeNumber}: {episode.title}</h3><span className="watch-link">Watch Now ↗</span></div>
                   </Link>
