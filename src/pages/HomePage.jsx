@@ -1,4 +1,5 @@
 import { useAuth } from "../auth/useAuth";
+import { setPageMetadata } from "../utils/pageMetadata";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { auth, firebaseReady } from "../firebase";
@@ -65,6 +66,14 @@ function DramaCards({ dramas, episodeCounts }) {
 
 export default function HomePage() {
   const [search, setSearch] = useState("");
+  useEffect(() => {
+  return setPageMetadata({
+    title: "Kflix Hindi – Hindi Dubbed Korean Dramas & Episodes",
+    description:
+      "Watch Hindi-dubbed Korean dramas, explore romantic and thriller series, and discover the latest episodes on Kflix Hindi.",
+    url: "https://kflix-hindi.pages.dev/",
+  });
+}, []);
   const { user } = useAuth();
   const handleLogout = async () => {
   try {
