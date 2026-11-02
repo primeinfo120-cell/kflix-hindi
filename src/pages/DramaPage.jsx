@@ -14,6 +14,43 @@ import { useAuth } from "../auth/useAuth";
 import { firebaseReady } from "../firebase";
 import { setPageMetadata } from "../utils/pageMetadata";
 
+function setDramaStructuredData(drama) {
+  const schemaId = "kflix-drama-schema";
+  let script = document.getElementById(schemaId);
+
+  if (!script) {
+    script = document.createElement("script");
+    script.id = schemaId;
+    script.type = "application/ld+json";
+    document.head.appendChild(script);
+  }
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    name: drama.title,
+    description: drama.description || "",
+    image: drama.posterUrl || undefined,
+    genre: drama.genre
+      ? String(drama.genre).split(",").map((item) => item.trim())
+      : undefined,
+    inLanguage: drama.language || "Hindi",
+    url: `${window.location.origin}/drama/${encodeURIComponent(drama.slug)}`,
+    publisher: {
+      "@type": "Organization",
+      name: "Kflix Hindi",
+      url: "https://kflix-hindi.pages.dev/",
+    },
+  };
+
+  script.textContent = JSON.stringify(schema);
+
+  return () => {
+    script.remove();
+  };
+}
+
+
 function formatReviewDate(timestamp) {
   if (!timestamp?.toDate) return "Recently";
   return timestamp.toDate().toLocaleDateString();
@@ -96,20 +133,29 @@ export default function DramaPage() {
     };
   }, [slug]);
 
-  useEffect(() => {
-    if (!drama || loadedSlug !== slug) return undefined;
+  
+useEffect(() => {
+  if (!drama || loadedSlug !== slug) return undefined;
 
-    const description =
-      drama.description ||
-      `${drama.title} — explore details and published episodes on Kflix Hindi.`;
+  const description =
+    drama.description ||
+    `${drama.title} — explore details and published episodes on Kflix Hindi.`;
 
-    return setPageMetadata({
-      title: `${drama.title} | Kflix Hindi`,
-      description,
-      image: drama.posterUrl,
-      url: window.location.href,
-    });
-  }, [drama, loadedSlug, slug]);
+  const cleanupMetadata = setPageMetadata({
+    title: `${drama.title} | Kflix Hindi`,
+    description,
+    image: drama.posterUrl,
+    url: window.location.href,
+  });
+
+  const cleanupSchema = setDramaStructuredData(drama);
+
+  return () => {
+    cleanupMetadata();
+    cleanupSchema();
+  };
+}, [drama, loadedSlug, slug]);
+
 
   useEffect(() => {
     if (!drama?.id || !firebaseReady) return undefined;
