@@ -1,3 +1,4 @@
+
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
@@ -10,7 +11,6 @@ import {
   where,
 } from "firebase/firestore";
 import { loadEnv } from "vite";
-import { getEmbeddableVideoUrl } from "../src/utils/videoEmbed.js";
 
 const siteUrl = "https://kflix-hindi.pages.dev";
 const outputPath = resolve("dist", "sitemap.xml");
@@ -25,38 +25,8 @@ function escapeXml(value) {
     .replaceAll("'", "&apos;");
 }
 
-function pageUrl(path) {
-  return `${siteUrl}${path}`;
-}
-
-function videoEntry(episode, drama) {
-  const playerUrl = getEmbeddableVideoUrl(episode.videoUrl);
-  if (!playerUrl) return "";
-
-  const title = `${drama.title} - Episode ${episode.episodeNumber}`.slice(0, 100);
-  const description = (
-    episode.description ||
-    `Watch episode ${episode.episodeNumber} of ${drama.title} on Kflix Hindi.`
-  ).slice(0, 2048);
-  const thumbnailUrl = episode.thumbnailUrl || drama.posterUrl;
-
-  return [
-    "<video:video>",
-    `<video:thumbnail_loc>${escapeXml(thumbnailUrl)}</video:thumbnail_loc>`,
-    `<video:title>${escapeXml(title)}</video:title>`,
-    `<video:description>${escapeXml(description)}</video:description>`,
-    `<video:player_loc>${escapeXml(playerUrl)}</video:player_loc>`,
-    "</video:video>",
-  ].join("");
-}
-
-function urlEntry(path, video = "") {
-  return [
-    "<url>",
-    `<loc>${escapeXml(pageUrl(path))}</loc>`,
-    video,
-    "</url>",
-  ].join("");
+function urlEntry(path) {
+  return `<url><loc>${escapeXml(`${siteUrl}${path}`)}</loc></url>`;
 }
 
 async function getPublishedContent() {
@@ -66,25 +36,20 @@ async function getPublishedContent() {
     "VITE_FIREBASE_PROJECT_ID",
     "VITE_FIREBASE_APP_ID",
   ];
+
   const hasAnyFirebaseConfig = requiredKeys.some((key) => env[key]);
 
   if (!requiredKeys.every((key) => env[key])) {
     if (hasAnyFirebaseConfig) {
-      throw new Error(
-        "Firebase sitemap generation requires VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, and VITE_FIREBASE_APP_ID.",
-      );
+      throw new Error("Firebase sitemap configuration is incomplete.");
     }
 
-    console.warn(
-      "Firebase environment variables are not configured; generating a homepage-only sitemap.",
-    );
+    console.warn("Firebase config missing; generating homepage-only sitemap.");
     return { dramas: [], episodes: [] };
   }
 
   if (env.VITE_FIREBASE_PROJECT_ID !== "kflix-156f2") {
-    throw new Error(
-      "Sitemap generation is configured for an unexpected Firebase project.",
-    );
+    throw new Error("Unexpected Firebase project.");
   }
 
   const app = initializeApp({
@@ -93,7 +58,9 @@ async function getPublishedContent() {
     projectId: env.VITE_FIREBASE_PROJECT_ID,
     appId: env.VITE_FIREBASE_APP_ID,
   });
+
   const db = getFirestore(app);
+
   const [dramaSnapshot, episodeSnapshot] = await Promise.all([
     getDocs(query(
       collection(db, "dramas"),
@@ -107,23 +74,25 @@ async function getPublishedContent() {
   ]);
 
   return {
-    dramas: dramaSnapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data(),
+    dramas: dramaSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
     })),
-    episodes: episodeSnapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data(),
+    episodes: episodeSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
     })),
   };
 }
 
 const { dramas, episodes } = await getPublishedContent();
+
 const publishedDramas = new Map(
   dramas
     .filter((drama) => drama.publicationStatus === "published" && drama.slug)
     .map((drama) => [drama.id, drama]),
 );
+
 const entries = [urlEntry("/")];
 
 for (const drama of publishedDramas.values()) {
@@ -132,6 +101,7 @@ for (const drama of publishedDramas.values()) {
 
 for (const episode of episodes) {
   const drama = publishedDramas.get(episode.dramaId);
+
   if (
     !drama ||
     episode.publicationStatus !== "published" ||
@@ -140,17 +110,12 @@ for (const episode of episodes) {
     continue;
   }
 
-  entries.push(
-    urlEntry(
-      `/watch/${encodeURIComponent(episode.id)}`,
-      videoEntry(episode, drama),
-    ),
-  );
+  entries.push(urlEntry(`/watch/${encodeURIComponent(episode.id)}`));
 }
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
-  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">',
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
   ...entries,
   "</urlset>",
   "",
@@ -158,6 +123,5 @@ const sitemap = [
 
 await mkdir(resolve("dist"), { recursive: true });
 await writeFile(outputPath, sitemap, "utf8");
-console.log(
-  `Generated sitemap with ${entries.length} URLs (${publishedDramas.size} dramas, ${entries.length - publishedDramas.size - 1} episodes).`,
-);
+
+console.log(`Generated simple sitemap with ${entries.length} URLs.`);
