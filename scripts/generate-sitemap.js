@@ -93,7 +93,7 @@ const publishedDramas = new Map(
     .map((drama) => [drama.id, drama]),
 );
 
-const entries = [urlEntry("/")];
+const entries = [urlEntry("/"), urlEntry("/about")];
 
 for (const drama of publishedDramas.values()) {
   entries.push(urlEntry(`/drama/${encodeURIComponent(drama.slug)}`));

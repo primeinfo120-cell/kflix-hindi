@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { auth, firebaseReady } from "../firebase";
 import { signOut } from "firebase/auth";
 import { watchPublishedDramas, watchPublishedEpisodes } from "../services/content";
+import SiteFooter from "../components/SiteFooter";
 
 const fallbackImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%233D0000'/%3E%3Ctext x='50%25' y='50%25' fill='white' font-family='Arial' font-size='24' text-anchor='middle'%3EKFLIX HINDI%3C/text%3E%3C/svg%3E";
 const sortNewest = (left, right) => (right.createdAt?.toMillis?.() ?? 0) - 
@@ -536,7 +537,7 @@ const navSearchResults = useMemo(() => {
           {!loading && !error && dramas.length > 0 && filtered.length === 0 ? <p className="content-state">No dramas found. Try another search or genre.</p> : null}
         </section>
       </main>
-      <footer><Link className="logo" to="/">KFLIX <span>HINDI</span></Link><p>Made for K-drama fans. © {new Date().getFullYear()} Kflix Hindi.</p></footer>
+      <SiteFooter />
     </div>
   );
 }

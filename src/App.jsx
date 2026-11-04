@@ -3,6 +3,7 @@ import "./App.css";
 import { AuthProvider } from "./auth/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import DramaPage from "./pages/DramaPage";
 import WatchPage from "./pages/WatchPage"; 
 import UserAuthPage from "./pages/UserAuthPage";
@@ -18,6 +19,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/drama/:slug" element={<DramaPage />} />
           <Route path="/watch/:episodeId" element={<WatchPage />} />
           <Route path="/login" element={<UserAuthPage />} />
