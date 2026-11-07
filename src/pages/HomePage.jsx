@@ -66,7 +66,6 @@ function DramaCards({ dramas, episodeCounts }) {
 }
 
 export default function HomePage() {
-  const [search, setSearch] = useState("");
   useEffect(() => {
   return setPageMetadata({
     title: "Kflix Hindi – Hindi Dubbed Korean Dramas & Episodes",
@@ -149,21 +148,11 @@ export default function HomePage() {
   }, [episodes, dramaMap]);
   const categories = useMemo(() => ["All", ...new Set(dramas.flatMap((drama) => (drama.genre || "").split(",").map((item) => item.trim()).filter(Boolean)))], [dramas]);
   const filtered = useMemo(() => {
-  return dramas.filter((drama) => {
-    const queryText = search.trim().toLowerCase();
-    const categoryText = (drama.genre || "").toLowerCase();
-
-    const matchesSearch = !queryText ||
-      [drama.title, drama.description, drama.genre, drama.language]
-        .some((value) => value?.toLowerCase().includes(queryText));
-
-    const matchesCategory =
-      category === "All" ||
-      categoryText.includes(category.toLowerCase());
-
-    return matchesSearch && matchesCategory;
-  });
-}, [dramas, search, category]);
+    return dramas.filter((drama) => (
+      category === "All"
+      || (drama.genre || "").toLowerCase().includes(category.toLowerCase())
+    ));
+  }, [dramas, category]);
 
 const navSearchResults = useMemo(() => {
   const query = navSearch.trim().toLowerCase();
@@ -527,7 +516,6 @@ const navSearchResults = useMemo(() => {
         <section className="catalog explore-section" id="dramas">
           <div className="section-heading">
             <div><span className="eyebrow">FIND YOUR NEXT OBSESSION</span><h2>Explore <span>Dramas</span></h2></div>
-            <label className="search-wrap"><span aria-hidden="true">⌕</span><input aria-label="Search dramas" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search dramas..." /></label>
           </div>
           <div className="categories" aria-label="Filter by genre">
             {categories.map((item) => (
@@ -535,7 +523,7 @@ const navSearchResults = useMemo(() => {
             ))}
           </div>
           {filtered.length > 0 ? <DramaCards dramas={filtered} episodeCounts={episodeCounts} /> : null}
-          {!loading && !error && dramas.length > 0 && filtered.length === 0 ? <p className="content-state">No dramas found. Try another search or genre.</p> : null}
+          {!loading && !error && dramas.length > 0 && filtered.length === 0 ? <p className="content-state">No dramas found in this genre.</p> : null}
         </section>
       </main>
       <SiteFooter />

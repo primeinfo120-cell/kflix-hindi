@@ -45,9 +45,6 @@ button { cursor: pointer; }
 .catalog, .latest { padding: 65px 7%; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
 .section-heading h2 { font-family: 'Outfit', sans-serif; font-size: 34px; letter-spacing: -1px; margin: 8px 0 0; }
-.search-wrap { display: flex; align-items: center; gap: 10px; width: 260px; background: #101010; border: 1px solid #333; border-radius: 6px; padding: 0 13px; color: #888; }
-.search-wrap:focus-within { border-color: var(--red); }
-.search-wrap input { width: 100%; outline: none; border: 0; background: transparent; color: white; padding: 12px 0; font-size: 12px; }
 .categories { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 28px; }
 .category { padding: 9px 16px; border: 1px solid #303030; background: #090909; color: #aaa; border-radius: 5px; font-size: 11px; }
 .category:hover, .category.active { color: white; border-color: var(--red); background: var(--dark-red); }
@@ -103,7 +100,6 @@ footer p { font-size: 11px; color: #777; }
   .catalog, .latest { padding: 45px 5%; }
   .section-heading { align-items: stretch; flex-direction: column; }
   .section-heading h2 { font-size: 29px; }
-  .search-wrap { width: 100%; }
   .drama-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .drama-info h3 { font-size: 12px; }
   footer { padding: 22px 5%; gap: 12px; flex-direction: column; align-items: flex-start; }
@@ -476,20 +472,6 @@ body {
 
 .explore-section {
   padding-top: 55px;
-}
-
-.search-wrap {
-  min-height: 44px;
-  background: #0c0c0c;
-  border-color: #292929;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.search-wrap:focus-within {
-  border-color: #950101;
-  box-shadow: 0 0 0 3px rgba(149, 1, 1, 0.13);
 }
 
 .categories {
