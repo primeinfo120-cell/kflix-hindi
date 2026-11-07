@@ -68,24 +68,53 @@ export default function DramaPage() {
   const [loadedSlug, setLoadedSlug] = useState("");
   const [shareMessage, setShareMessage] = useState("");
 
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [reviewError, setReviewError] = useState("");
+  const [reviewState, setReviewState] = useState({
+    dramaId: "",
+    items: [],
+    loading: true,
+    error: "",
+  });
   const [reviewMessage, setReviewMessage] = useState("");
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
+  const [savedReviewForm, setSavedReviewForm] = useState({
+    key: "",
+    rating: 5,
+    comment: "",
+  });
   const [reviewBusy, setReviewBusy] = useState(false);
-  const [formInitializedFor, setFormInitializedFor] = useState("");
 
+  const reviewStateMatchesDrama = Boolean(drama?.id) && reviewState.dramaId === drama.id;
+  const reviews = reviewStateMatchesDrama ? reviewState.items : [];
+  const reviewsLoading = !reviewStateMatchesDrama || reviewState.loading;
+  const reviewError = reviewStateMatchesDrama ? reviewState.error : "";
   const ownReview = reviews.find((review) => review.uid === user?.uid);
+  const reviewFormKey = drama?.id
+    ? `${drama.id}:${user?.uid || "guest"}`
+    : "";
+  const reviewForm = savedReviewForm.key === reviewFormKey
+    ? savedReviewForm
+    : {
+      key: reviewFormKey,
+      rating: ownReview?.rating ?? 5,
+      comment: ownReview?.comment ?? "",
+    };
+
+  function updateReviewError(message) {
+    if (!drama?.id) return;
+    setReviewState((current) => ({
+      dramaId: drama.id,
+      items: current.dramaId === drama.id ? current.items : [],
+      loading: current.dramaId === drama.id ? current.loading : false,
+      error: message,
+    }));
+  }
+
+  function updateReviewForm(update) {
+    setSavedReviewForm({ ...reviewForm, ...update });
+  }
 
   useEffect(() => {
     let stopEpisodes;
     let cancelled = false;
-
-    setDrama(null);
-    setEpisodes([]);
-    setLoadedSlug("");
 
     if (!firebaseReady) return undefined;
 
@@ -160,48 +189,28 @@ useEffect(() => {
   useEffect(() => {
     if (!drama?.id || !firebaseReady) return undefined;
 
-    setReviewsLoading(true);
-    setReviewError("");
-    setReviews([]);
-    setFormInitializedFor("");
-
     const stopReviews = watchDramaReviews(
       drama.id,
       (items) => {
-        setReviews(items);
-        setReviewsLoading(false);
+        setReviewState({
+          dramaId: drama.id,
+          items,
+          loading: false,
+          error: "",
+        });
       },
       (cause) => {
-        setReviewError(cause.message || "Could not load reviews.");
-        setReviewsLoading(false);
+        setReviewState((current) => ({
+          dramaId: drama.id,
+          items: current.dramaId === drama.id ? current.items : [],
+          loading: false,
+          error: cause.message || "Could not load reviews.",
+        }));
       },
     );
 
     return stopReviews;
   }, [drama?.id]);
-
-  useEffect(() => {
-    if (!drama?.id || reviewsLoading) return;
-
-    const key = `${drama.id}:${user?.uid || "guest"}`;
-    if (formInitializedFor === key) return;
-
-    if (user && ownReview) {
-      setRating(ownReview.rating);
-      setComment(ownReview.comment);
-    } else {
-      setRating(5);
-      setComment("");
-    }
-
-    setFormInitializedFor(key);
-  }, [
-    drama?.id,
-    user?.uid,
-    reviewsLoading,
-    ownReview,
-    formInitializedFor,
-  ]);
 
   async function copyDramaLink() {
     try {
@@ -239,22 +248,26 @@ useEffect(() => {
 
   async function handleReviewSubmit(event) {
     event.preventDefault();
-    setReviewError("");
+    updateReviewError("");
     setReviewMessage("");
 
     if (!user) {
-      setReviewError("Please sign in to submit a review.");
+      updateReviewError("Please sign in to submit a review.");
       return;
     }
 
     setReviewBusy(true);
 
     try {
-      await saveDramaReview(drama.id, user, rating, comment);
+      await saveDramaReview(
+        drama.id,
+        user,
+        reviewForm.rating,
+        reviewForm.comment,
+      );
       setReviewMessage("Your review has been saved.");
-      setFormInitializedFor(`${drama.id}:${user.uid}`);
     } catch (cause) {
-      setReviewError(cause.message || "Could not save your review.");
+      updateReviewError(cause.message || "Could not save your review.");
     } finally {
       setReviewBusy(false);
     }
@@ -268,18 +281,16 @@ useEffect(() => {
     );
     if (!confirmed) return;
 
-    setReviewError("");
+    updateReviewError("");
     setReviewMessage("");
     setReviewBusy(true);
 
     try {
       await deleteDramaReview(drama.id, user.uid);
-      setRating(5);
-      setComment("");
+      updateReviewForm({ rating: 5, comment: "" });
       setReviewMessage("Your review has been deleted.");
-      setFormInitializedFor(`${drama.id}:${user.uid}`);
     } catch (cause) {
-      setReviewError(cause.message || "Could not delete your review.");
+      updateReviewError(cause.message || "Could not delete your review.");
     } finally {
       setReviewBusy(false);
     }
@@ -429,11 +440,11 @@ useEffect(() => {
                     key={star}
                     type="button"
                     className={`review-star ${
-                      star <= rating ? "selected" : ""
+                      star <= reviewForm.rating ? "selected" : ""
                     }`}
                     aria-label={`${star} ${star === 1 ? "star" : "stars"}`}
-                    aria-pressed={rating === star}
-                    onClick={() => setRating(star)}
+                    aria-pressed={reviewForm.rating === star}
+                    onClick={() => updateReviewForm({ rating: star })}
                   >
                     ★
                   </button>
@@ -443,14 +454,14 @@ useEffect(() => {
               <label htmlFor="review-comment">Your comment</label>
               <textarea
                 id="review-comment"
-                value={comment}
-                onChange={(event) => setComment(event.target.value)}
+                value={reviewForm.comment}
+                onChange={(event) => updateReviewForm({ comment: event.target.value })}
                 placeholder="What did you think of this drama?"
                 rows={4}
                 maxLength={1000}
                 required
               />
-              <small>{comment.length}/1000 characters</small>
+              <small>{reviewForm.comment.length}/1000 characters</small>
 
               {reviewError ? (
                 <p className="form-error" role="alert">

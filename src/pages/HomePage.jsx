@@ -212,30 +212,31 @@ const navSearchResults = useMemo(() => {
 }, [episodes, dramaMap]);
  
   useEffect(() => {
-    if (latestDramas.length <= 1) {
-      setActiveSlide(0);
-      return;
-    }
+    if (latestDramas.length <= 1) return undefined;
 
     const timer = setInterval(() => {
-      setActiveSlide((current) => (current + 1) % latestDramas.length);
+      setActiveSlide((current) => (current % latestDramas.length + 1) % latestDramas.length);
     }, 6000);
 
     return () => clearInterval(timer);
   }, [latestDramas.length]);
 
-  const slideDrama = latestDramas[activeSlide] || latestDramas[0];
+  const activeSlideIndex = latestDramas.length
+    ? activeSlide % latestDramas.length
+    : 0;
+  const slideDrama = latestDramas[activeSlideIndex];
 
   const showPreviousSlide = () => {
-    setActiveSlide((current) =>
-      current <= 0 ? latestDramas.length - 1 : current - 1
-    );
+    if (!latestDramas.length) return;
+    setActiveSlide((current) => {
+      const currentIndex = current % latestDramas.length;
+      return currentIndex <= 0 ? latestDramas.length - 1 : currentIndex - 1;
+    });
   };
 
   const showNextSlide = () => {
-    setActiveSlide((current) =>
-      latestDramas.length ? (current + 1) % latestDramas.length : 0
-    );
+    if (!latestDramas.length) return;
+    setActiveSlide((current) => (current % latestDramas.length + 1) % latestDramas.length);
   };
 
 
@@ -428,10 +429,10 @@ const navSearchResults = useMemo(() => {
                   <button
                     type="button"
                     key={drama.id}
-                    className={index === activeSlide ? "hero-dot active" : "hero-dot"}
+                    className={index === activeSlideIndex ? "hero-dot active" : "hero-dot"}
                     onClick={() => setActiveSlide(index)}
                     aria-label={`Show ${drama.title}`}
-                    aria-current={index === activeSlide ? "true" : undefined}
+                    aria-current={index === activeSlideIndex ? "true" : undefined}
                   />
                 ))}
               </div>

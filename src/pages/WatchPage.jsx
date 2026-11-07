@@ -27,15 +27,33 @@ export default function WatchPage() {
   const [error, setError] = useState("");
   const [loadedEpisodeId, setLoadedEpisodeId] = useState("");
 
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [reviewError, setReviewError] = useState("");
+  const [reviewState, setReviewState] = useState({
+    dramaId: "",
+    items: [],
+    loading: true,
+    error: "",
+  });
   const [reviewMessage, setReviewMessage] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [reviewBusy, setReviewBusy] = useState(false);
 
+  const reviewStateMatchesDrama = Boolean(episode?.dramaId)
+    && reviewState.dramaId === episode.dramaId;
+  const reviews = reviewStateMatchesDrama ? reviewState.items : [];
+  const reviewsLoading = !reviewStateMatchesDrama || reviewState.loading;
+  const reviewError = reviewStateMatchesDrama ? reviewState.error : "";
   const ownReview = reviews.find((review) => review.uid === user?.uid);
+
+  function updateReviewError(message) {
+    if (!episode?.dramaId) return;
+    setReviewState((current) => ({
+      dramaId: episode.dramaId,
+      items: current.dramaId === episode.dramaId ? current.items : [],
+      loading: current.dramaId === episode.dramaId ? current.loading : false,
+      error: message,
+    }));
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -93,34 +111,49 @@ export default function WatchPage() {
   useEffect(() => {
     if (!episode?.dramaId || !firebaseReady) return undefined;
 
-    setReviewsLoading(true);
-    setReviewError("");
-
+    let active = true;
     let unsubscribe;
 
     try {
       unsubscribe = watchDramaReviews(
         episode.dramaId,
         (items) => {
-          setReviews(items);
-          setReviewsLoading(false);
+          if (!active) return;
+          setReviewState({
+            dramaId: episode.dramaId,
+            items,
+            loading: false,
+            error: "",
+          });
         },
         (cause) => {
-          setReviewError(cause.message || "Could not load reviews.");
-          setReviewsLoading(false);
+          if (!active) return;
+          setReviewState((current) => ({
+            dramaId: episode.dramaId,
+            items: current.dramaId === episode.dramaId ? current.items : [],
+            loading: false,
+            error: cause.message || "Could not load reviews.",
+          }));
         },
       );
     } catch (cause) {
-      setReviewError(cause.message || "Could not load reviews.");
-      setReviewsLoading(false);
+      setReviewState((current) => ({
+        dramaId: episode.dramaId,
+        items: current.dramaId === episode.dramaId ? current.items : [],
+        loading: false,
+        error: cause.message || "Could not load reviews.",
+      }));
     }
 
-    return () => unsubscribe?.();
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, [episode?.dramaId]);
 
   async function handleReviewSubmit(event) {
     event.preventDefault();
-    setReviewError("");
+    updateReviewError("");
     setReviewMessage("");
     setReviewBusy(true);
 
@@ -134,7 +167,7 @@ export default function WatchPage() {
 
       setReviewMessage("Your review has been saved.");
     } catch (cause) {
-      setReviewError(cause.message || "Could not save your review.");
+      updateReviewError(cause.message || "Could not save your review.");
     } finally {
       setReviewBusy(false);
     }
@@ -143,7 +176,7 @@ export default function WatchPage() {
   async function handleDeleteReview() {
     if (!user || !window.confirm("Delete your review?")) return;
 
-    setReviewError("");
+    updateReviewError("");
     setReviewMessage("");
     setReviewBusy(true);
 
@@ -153,7 +186,7 @@ export default function WatchPage() {
       setRating(5);
       setReviewMessage("Your review has been deleted.");
     } catch (cause) {
-      setReviewError(cause.message || "Could not delete your review.");
+      updateReviewError(cause.message || "Could not delete your review.");
     } finally {
       setReviewBusy(false);
     }
@@ -165,7 +198,7 @@ export default function WatchPage() {
     setRating(ownReview.rating);
     setComment(ownReview.comment);
     setReviewMessage("You can now edit your review.");
-    setReviewError("");
+    updateReviewError("");
   }
 
   if (loadedEpisodeId !== episodeId) {
